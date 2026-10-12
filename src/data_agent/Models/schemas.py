@@ -5,10 +5,12 @@ from pydantic import BaseModel, Field
 
 
 class AgentSchema(BaseModel):
-    message: Annotated[list, add] = Field(
+    messages: Annotated[list, add] = Field(
         ...,
         description="List of messages"
     )
+
+    user_input:str=Field(...,description="The original question asked by the user")
 
     curated_ques: str = Field(
         ...,
