@@ -1,10 +1,9 @@
-from data_agent.Models.schemas import AgentSchema, JudgeSchema
+from data_agent.models.schemas import AgentSchema, JudgeSchema
 from data_agent.utils.llm import choose_llm
 
 
 
-
-def check_input_query(state:AgentSchema)->AgentSchema:
+def guard_node(state:AgentSchema)->AgentSchema:
     sql_query=state.generated_sql_query
 
     llm=choose_llm("high")
@@ -47,5 +46,3 @@ def check_input_query(state:AgentSchema)->AgentSchema:
     state.comments=response['comments']
 
     return state
-
-    
