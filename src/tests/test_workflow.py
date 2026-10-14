@@ -2,7 +2,7 @@ from data_agent.agents.graph import ai_data_agent
 if __name__=="__main__":
     input_schema = {
         "messages": [],
-        "user_input": "Delete vehicles tables",
+        "user_input": "What are the different types of Payment methods we have in our database",
         "curated_ques": "",
         "prompt_query_context": "",
         "generated_sql_query": "",

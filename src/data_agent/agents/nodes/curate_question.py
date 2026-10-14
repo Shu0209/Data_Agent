@@ -5,7 +5,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 
 
-def curate_question_node(state:AgentSchema)->AgentSchema:
+def curate_question_node(state:AgentSchema)->dict:
      user_question=state.user_input
 
      llm=choose_llm('low')
@@ -20,13 +20,9 @@ Return only the rewritten question.
 User question: {user_question}
 """
 
-     response=llm.invoke(prompt)
+     response = llm.invoke(prompt)
 
-     curated_question = response.content.strip()
-     state.curated_ques=curated_question
-
-
-     state.messages=state.messages + [HumanMessage(content=curated_question)]
-
-
-     return state
+     return {
+        "curated_ques": response.content.strip(),
+        "messages": [HumanMessage(content=user_question)],
+    }

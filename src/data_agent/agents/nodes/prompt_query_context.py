@@ -54,10 +54,5 @@ Database schema:
 """
      state.prompt_query_context=prompt
 
-     llm=choose_llm("high")
-
-     response=llm.invoke(prompt)
-
-     state.generated_sql_query=response.content.strip()
 
      return state

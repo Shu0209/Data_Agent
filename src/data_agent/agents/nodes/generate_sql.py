@@ -9,9 +9,9 @@ def generate_sql_node(state: AgentSchema)->AgentSchema:
 
     llm=choose_llm("high")
 
-    generate_sql_query=llm.invoke(prompt).content
+    response = llm.invoke(state.prompt_query_context)
 
 
-    state.generated_sql_query=generate_sql_query
+    state.generated_sql_query=response.content.strip()
 
     return state
