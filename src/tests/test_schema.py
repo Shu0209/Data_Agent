@@ -1,4 +1,4 @@
-from data_agent.Models.schemas import AgentSchema
+from data_agent.models.schemas import AgentSchema
 
 state = AgentSchema(
     message=["User: Show me total sales"],

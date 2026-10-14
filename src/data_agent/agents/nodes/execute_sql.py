@@ -18,7 +18,7 @@ def execute_sql_node(state:AgentSchema)->AgentSchema:
 
     obj=DatabaseClass(conn_details)
 
-    execution_result=obj.execute_sql(sql_query)
+    execution_result=obj.execute_query(sql_query)
 
     state.sql_query_execution_result=execution_result
 

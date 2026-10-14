@@ -3,7 +3,7 @@ from data_agent.utils.llm import choose_llm
 
 
 
-def guard_node(state:AgentSchema)->AgentSchema:
+def judge_node(state:AgentSchema)->AgentSchema:
     sql_query=state.generated_sql_query
 
     llm=choose_llm("high")
