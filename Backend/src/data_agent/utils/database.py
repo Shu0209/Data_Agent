@@ -81,19 +81,19 @@ class DatabaseClass:
                 connection.close()
 
 
-obj= DatabaseClass({
-    "host":settings.DB_host,
-    "port":settings.DB_port,
-    "user":settings.DB_user,
-    "password":settings.DB_password,
-    "dbname":settings.DB_name
-})
+if __name__ == "__main__":
+    obj = DatabaseClass({
+        "host": settings.DB_host,
+        "port": settings.DB_port,
+        "user": settings.DB_user,
+        "password": settings.DB_password,
+        "dbname": settings.DB_name
+    })
 
+    result = obj.schema_details("public")
 
-result=obj.schema_details("public")
-
-with open("test_schema_details.txt","w") as f:
-    f.write(result)
+    with open("test_schema_details.txt", "w") as f:
+        f.write(result)
 
 
 

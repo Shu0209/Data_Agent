@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.143.1",
     "langchain>=1.4.3",
     "langchain-community>=0.4.2",
     "langchain-core>=1.6.8",
@@ -15,10 +16,11 @@ dependencies = [
     "langgraph>=1.2.14",
     "psycopg2-binary>=2.9.13",
     "pydantic>=2.14.0",
+    "sqlglot>=30.22.0",
 ]
 
 [project.scripts]
-data-agent = "data_agent:main"
+data-agent = "data_agent.main:main"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
