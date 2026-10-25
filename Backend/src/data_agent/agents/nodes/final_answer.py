@@ -36,7 +36,7 @@ User's question:
 {curated_question}
 
 SQL execution result:
-{execution_result}
+{execution_result[:20]}
 
 Final answer:
 """

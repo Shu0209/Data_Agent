@@ -23,6 +23,7 @@ class Settings:
 
         self.groq_model1 = "openai/gpt-oss-120b"
         self.groq_model2 = "openai/gpt-oss-20b"
+        self.groq_guardrail_model="qwen/qwen3.8-27b"
 
 
 
