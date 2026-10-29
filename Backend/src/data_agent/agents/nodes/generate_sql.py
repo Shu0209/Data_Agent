@@ -5,7 +5,7 @@ from data_agent.utils.llm import choose_llm
 
 
 def generate_sql_node(state: AgentSchema)->AgentSchema:
-    prompt=state.prompt_query_context
+    
 
     llm=choose_llm("high")
 

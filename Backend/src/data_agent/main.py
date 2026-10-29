@@ -3,6 +3,7 @@ from fastapi import FastAPI, Response
 from pydantic import BaseModel, Field
 from typing import Optional
 from data_agent.agents import ai_data_agent
+from data_agent.guardrails.rails import check_guardrails
 
 import logging
 
@@ -37,6 +38,13 @@ def get_graph_image():
 
     except Exception as e:
         logger.exception(f"Could not generate graph image: {e}")
+        return Response(content="Could not generate graph image", status_code=500)
+
+
+@app.post("/guardrail")
+def guardrail_check(request: QueryRequest):
+    """Directly evaluate user input against NeMo Guardrails."""
+    return check_guardrails(request.user_input)
 
 
 @app.post("/query")
@@ -45,6 +53,27 @@ def query(request: QueryRequest):
     user_input = request.user_input
     thread_id = request.thread_id
 
+    # 1. Guardrail input validation
+    try:
+        guardrail_result = check_guardrails(user_input)
+        if not guardrail_result.get("is_allowed", True):
+            logger.info(
+                f"Guardrail intercepted query: flagged={guardrail_result.get('flagged')}, "
+                f"reason={guardrail_result.get('reason')}"
+            )
+            return {
+                "curated_ques": user_input,
+                "prompt_query_context": "",
+                "generated_sql_query": "",
+                "is_safe": "No" if guardrail_result.get("flagged") else "Yes",
+                "comments": guardrail_result.get("reason", "Handled by Guardrails"),
+                "sql_query_execution_result": "",
+                "final_answer": guardrail_result.get("bot_response", "")
+            }
+    except Exception as e:
+        logger.exception(f"Guardrail check failed: {e}")
+
+    # 2. Proceed with Agent LangGraph workflow if input conforms to guardrails
     state = {
         "messages": [],
         "user_input": user_input,
@@ -75,15 +104,14 @@ def query(request: QueryRequest):
         }
 
     except Exception as e:
+        logger.exception(f"Error during agent execution: {e}")
         return {
-            "messages": final_output.get("messages"),
             "user_input": user_input,
             "curated_ques": "",
             "prompt_query_context": "",
             "generated_sql_query": "",
-            "is_safe": "",
-            "comments": "",
+            "is_safe": "No",
+            "comments": f"Internal error during execution: {e}",
             "sql_query_execution_result": "",
             "final_answer": "I apologize, but I encountered an internal error while processing your request. Please try again later.",
-            "thought_process": ["Error encountered during execution."],
         }

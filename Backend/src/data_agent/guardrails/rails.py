@@ -5,8 +5,8 @@ providing both synchronous and asynchronous interfaces for input validation,
 security filtering, and topic moderation.
 """
 
-from openai.types.beta import beta_response_format_text_config_param
 import os
+import logging
 from typing import Optional, Dict, Any
 from nemoguardrails import LLMRails, RailsConfig
 from data_agent.config import settings
@@ -147,12 +147,21 @@ async def async_check_guardrails(user_input: str) -> Dict[str, Any]:
         "cannot answer",
         "can't respond",
         "i cannot fulfill this request",
+        "i'm sorry, i can't help with that",
+        "i cannot help with that",
+        "i can't help with that",
+        "i cannot assist with that",
     ]
 
     is_refusal = any(keyword in bot_text.lower() for keyword in refusal_keywords)
     is_greeting_or_info = any(
         k in bot_text.lower()
-        for k in ["hello! i am your ai data agent", "autonomous sql analytics agent"]
+        for k in [
+            "hello! i am your ai data agent",
+            "hello! how can i assist you today?",
+            "autonomous sql analytics agent",
+            "i can help you with a wide range of tasks",
+        ]
     )
 
     if is_refusal:
