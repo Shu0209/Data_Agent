@@ -19,9 +19,14 @@ class AgentSchema(BaseModel):
         description="Curated user question"
     )
 
-    prompt_query_context: str = Field(
+    schema_context: str = Field(
         default="",
-        description="Detailed prompt containing SQL database context"
+        description="Question-scoped schema text for SQL generation"
+    )
+
+    schema_tables: list[str] = Field(
+        default_factory=list,
+        description="Names of the tables included in schema_context"
     )
 
     is_safe: Literal["Yes", "No"] = Field(

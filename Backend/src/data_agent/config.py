@@ -35,6 +35,18 @@ class Settings:
         self.DB_user = os.getenv("DB_user") or os.getenv("DB_USER") or "postgres"
         self.DB_password = os.getenv("DB_password") or os.getenv("DB_PASSWORD") or "password"
 
+        self.DB_schema = os.getenv("DB_schema") or os.getenv("DB_SCHEMA") or "public"
+
+
+        # Schema context (what gets sent to the SQL-generation prompt)
+        self.schema_cache_ttl = int(os.getenv("SCHEMA_CACHE_TTL_SECONDS", "300"))
+        self.schema_max_chars = int(os.getenv("SCHEMA_MAX_CHARS", "12000"))  # ~3k tokens
+        self.schema_value_hints = os.getenv("SCHEMA_VALUE_HINTS", "true").lower() in ("1", "true", "yes")
+        self.schema_hint_max_values = int(os.getenv("SCHEMA_HINT_MAX_VALUES", "12"))
+
+
+
+
         if not self.groq_api_key:
             raise ValueError(
                 "GROQ_API_KEY is missing. "

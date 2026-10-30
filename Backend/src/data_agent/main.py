@@ -63,7 +63,7 @@ def query(request: QueryRequest):
             )
             return {
                 "curated_ques": user_input,
-                "prompt_query_context": "",
+                "schema_tables": [],
                 "generated_sql_query": "",
                 "is_safe": "No" if guardrail_result.get("flagged") else "Yes",
                 "comments": guardrail_result.get("reason", "Handled by Guardrails"),
