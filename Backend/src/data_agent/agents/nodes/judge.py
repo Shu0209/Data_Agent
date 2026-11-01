@@ -2,15 +2,12 @@ from data_agent.models.schemas import AgentSchema, JudgeSchema
 from data_agent.utils.llm import choose_llm
 
 
+def judge_node(state: AgentSchema) -> AgentSchema:
+    sql_query = state.generated_sql_query
 
-def judge_node(state:AgentSchema)->AgentSchema:
-    sql_query=state.generated_sql_query
+    llm = choose_llm("low")
 
-    llm=choose_llm("low")
-
-    llm_judge=llm.with_structured_output(JudgeSchema)
-
-
+    llm_judge = llm.with_structured_output(JudgeSchema)
 
     prompt = f"""
     You are an SQL security judge for a read-only data retrieval agent.
@@ -38,11 +35,10 @@ def judge_node(state:AgentSchema)->AgentSchema:
     {sql_query}
     """
 
+    response = llm_judge.invoke(prompt).model_dump()
 
-    response=llm_judge.invoke(prompt).model_dump()
+    state.is_safe = response["answer"]
 
-    state.is_safe=response['answer']
-
-    state.comments=response['comments']
+    state.comments = response["comments"]
 
     return state

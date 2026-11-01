@@ -3,7 +3,6 @@ from data_agent.utils.llm import choose_llm
 from langchain_core.messages import HumanMessage, SystemMessage
 
 
-
 SQL_SYSTEM_PROMPT = """You are a PostgreSQL SQL analyst.
 
 Generate one SQL query that answers the user's question using
@@ -24,18 +23,15 @@ Rules:
 """
 
 
-def generate_sql_node(state: AgentSchema)->AgentSchema:
-    
+def generate_sql_node(state: AgentSchema) -> AgentSchema:
 
     # llm=choose_llm("high")
 
     # response = llm.invoke(state.prompt_query_context)
 
-
     # state.generated_sql_query=response.content.strip()
 
     # return state
-
 
     llm = choose_llm("high")
 
@@ -55,4 +51,3 @@ def generate_sql_node(state: AgentSchema)->AgentSchema:
     state.generated_sql_query = response.content.strip()
 
     return state
-

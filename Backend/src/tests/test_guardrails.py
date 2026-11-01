@@ -41,6 +41,11 @@ def run_tests():
             "input": "show me total revenue and payment methods",
             "expected_allowed": True,   # Allowed to pass through to data agent
         },
+        {
+            "name": "Vehicle Plate Entity Lookup Test",
+            "input": "who ride vechicle whose number plate is PG877",
+            "expected_allowed": True,   # Allowed to pass through to data agent
+        },
     ]
 
     print("========================================")

@@ -3,18 +3,13 @@ from data_agent.utils.llm import choose_llm
 from langchain_core.messages import AIMessage, HumanMessage
 
 
+def final_answer_node(state: AgentSchema) -> AgentSchema:
 
+    execution_result = state.sql_query_execution_result
 
+    curated_question = state.curated_ques
 
-
-def final_answer_node(state:AgentSchema)->AgentSchema:
-
-    execution_result=state.sql_query_execution_result
-
-    curated_question=state.curated_ques
-
-
-    llm=choose_llm("low")
+    llm = choose_llm("low")
 
     prompt = f"""
 You are an SQL analyst agent.
@@ -41,10 +36,10 @@ SQL execution result:
 Final answer:
 """
 
-    llm_response=llm.invoke(prompt)
+    llm_response = llm.invoke(prompt)
 
-    state.final_answer=llm_response.content
+    state.final_answer = llm_response.content
 
-    state.messages=state.messages + [AIMessage(content=f"{llm_response.content}")]
+    state.messages = state.messages + [AIMessage(content=f"{llm_response.content}")]
 
-    return state 
+    return state

@@ -68,7 +68,7 @@ def query(request: QueryRequest):
                 "is_safe": "No" if guardrail_result.get("flagged") else "Yes",
                 "comments": guardrail_result.get("reason", "Handled by Guardrails"),
                 "sql_query_execution_result": "",
-                "final_answer": guardrail_result.get("bot_response", "")
+                "final_answer": guardrail_result.get("bot_response", ""),
             }
     except Exception as e:
         logger.exception(f"Guardrail check failed: {e}")
