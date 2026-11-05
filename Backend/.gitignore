@@ -79,6 +79,7 @@ checkpoints/
 feed_db.py
 
 data/
+data2/
 
 guard_test.py
 

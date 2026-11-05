@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
 from data_agent.agents import ai_data_agent
@@ -14,6 +15,20 @@ logger = logging.getLogger(__name__)
 
 
 app = FastAPI(title="Database Agent")
+
+
+origins = [
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class QueryRequest(BaseModel):
