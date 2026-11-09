@@ -1,10 +1,18 @@
+# import sys
+# from pathlib import Path
+
+# SRC_DIR = Path(__file__).resolve().parent.parent
+# if str(SRC_DIR) not in sys.path:
+#     sys.path.insert(0, str(SRC_DIR))
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
-from data_agent.agents import ai_data_agent
 from data_agent.guardrails.rails import check_guardrails
+from data_agent.agents.graph import ai_data_agent
+
 
 import logging
 
@@ -24,11 +32,15 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
+
 
 
 class QueryRequest(BaseModel):
@@ -130,3 +142,10 @@ def query(request: QueryRequest):
             "sql_query_execution_result": "",
             "final_answer": "I apologize, but I encountered an internal error while processing your request. Please try again later.",
         }
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("data_agent.main:app", host="0.0.0.0", port=8000, reload=True)
+

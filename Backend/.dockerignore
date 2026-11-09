@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+.git/
+.gitignore
+*.png
+test_schema_details.txt
+tests/

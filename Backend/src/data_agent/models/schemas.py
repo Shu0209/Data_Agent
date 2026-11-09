@@ -2,12 +2,22 @@
 from typing import Annotated, Literal
 from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
+from data_agent.config import settings
 
 from pydantic import BaseModel, Field
 
 
+MAX_HISTORY_MESSAGES = settings.max_messages
+
+
+def _add_messages_capped(left, right):
+    """add_messages, but never keep more than MAX_HISTORY_MESSAGES messages."""
+    return add_messages(left, right)[-MAX_HISTORY_MESSAGES:]
+
+
+
 class AgentSchema(BaseModel):
-    messages: Annotated[list[AnyMessage], add_messages] = Field(
+    messages: Annotated[list[AnyMessage], _add_messages_capped] = Field(
         default_factory=list,
         description="Messages History"
     )
@@ -45,6 +55,10 @@ class AgentSchema(BaseModel):
         default="",
         description="Result of executing the generated SQL query"
     )
+
+
+   
+
 
     final_answer: str = Field(
         default="",

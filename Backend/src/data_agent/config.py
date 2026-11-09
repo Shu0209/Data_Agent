@@ -46,6 +46,12 @@ class Settings:
 
 
 
+        self.max_messages=int(os.getenv("MAX_MESSAGES","20"))
+
+        self.max_sql_retries=int(os.getenv("MAX_SQL_RETRIES","2"))
+
+
+
 
         if not self.groq_api_key:
             raise ValueError(
