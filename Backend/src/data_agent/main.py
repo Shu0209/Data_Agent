@@ -1,20 +1,19 @@
-# import sys
-# from pathlib import Path
-
-# SRC_DIR = Path(__file__).resolve().parent.parent
-# if str(SRC_DIR) not in sys.path:
-#     sys.path.insert(0, str(SRC_DIR))
-
+from slowapi import _rate_limit_exceeded_handler
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
 from data_agent.guardrails.rails import check_guardrails
 from data_agent.agents.graph import ai_data_agent
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 
 import logging
+import os
 
 
 load_dotenv()
@@ -24,15 +23,18 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Database Agent")
 
+limiter=Limiter(key_func=get_remote_address)
+app.state.limiter=limiter
 
-origins = [
-    "http://localhost:8001",
-    "http://127.0.0.1:8001",
-]
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+origins=os.getenv("FRONTEND_URL","http://127.0.0.1:8001")
+
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,10 +77,11 @@ def guardrail_check(request: QueryRequest):
 
 
 @app.post("/query")
-def query(request: QueryRequest):
+@limiter.limit("6/minute")
+def query(request:Request ,query_data: QueryRequest):
 
-    user_input = request.user_input
-    thread_id = request.thread_id
+    user_input = query_data.user_input
+    thread_id = query_data.thread_id
 
     # 1. Guardrail input validation
     try:

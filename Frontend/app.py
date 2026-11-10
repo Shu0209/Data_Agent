@@ -1,4 +1,4 @@
-
+import os
 import uuid
 
 import requests
@@ -37,9 +37,10 @@ if "chat_history" not in st.session_state:
 with st.sidebar:
     st.header("Settings")
 
+    default_backend_url = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
     backend_url = st.text_input(
         "FastAPI Backend URL",
-        value="http://127.0.0.1:8000",
+        value=default_backend_url,
     ).strip().rstrip("/")
 
     show_sql = st.toggle(

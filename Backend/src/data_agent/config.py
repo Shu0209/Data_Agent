@@ -29,13 +29,12 @@ class Settings:
 
         # DB config
 
-        self.DB_host = os.getenv("DB_host") or os.getenv("DB_HOST") or "localhost"
-        self.DB_port = os.getenv("DB_port") or os.getenv("DB_PORT") or 5432
-        self.DB_name = os.getenv("DB_name") or os.getenv("DB_NAME") or "data_agent_db"
-        self.DB_user = os.getenv("DB_user") or os.getenv("DB_USER") or "postgres"
-        self.DB_password = os.getenv("DB_password") or os.getenv("DB_PASSWORD") or "password"
-
-        self.DB_schema = os.getenv("DB_schema") or os.getenv("DB_SCHEMA") or "public"
+        self.DB_host = os.getenv("DB_HOST", "localhost")
+        self.DB_port = int(os.getenv("DB_PORT", "5432"))
+        self.DB_name = os.getenv("DB_NAME", "data_agent_db")
+        self.DB_user = os.getenv("DB_USER", "postgres")
+        self.DB_password = os.getenv("DB_PASSWORD")
+        self.DB_schema = os.getenv("DB_SCHEMA", "public")
 
 
         # Schema context (what gets sent to the SQL-generation prompt)
@@ -53,11 +52,12 @@ class Settings:
 
 
 
+    def validate_groq_api(self):
         if not self.groq_api_key:
             raise ValueError(
                 "GROQ_API_KEY is missing. "
-                "Please configure it in your .env file."
-            )
+                "Configure it before using Groq models."
+                )
 
 
 settings = Settings()

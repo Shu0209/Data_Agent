@@ -2,6 +2,7 @@ from langchain_openai import ChatOpenAI
 from data_agent.config import settings
 
 def choose_llm(level:str):
+    settings.validate_groq_api()
     if level.strip().lower()=="high":
         llm=ChatOpenAI(base_url=settings.groq_model_api_base,
                        model=settings.groq_model1,
