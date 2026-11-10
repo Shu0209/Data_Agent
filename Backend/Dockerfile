@@ -38,7 +38,7 @@ RUN useradd --create-home --uid 10001 app
 
 # Copy application source code
 COPY --chown=app:app src/ /app/src/
-COPY --chown=app:app data/ /app/data/
+
 
 
 # Switch to non-root user
