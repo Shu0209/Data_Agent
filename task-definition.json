@@ -1,0 +1,32 @@
+{
+  "family": "data-agent-backend-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::958295070824:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "958295070824.dkr.ecr.ap-southeast-2.amazonaws.com/data-agent-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "DB_HOST", "value": "localhost" },
+        { "name": "DB_PORT", "value": "5432" },
+        { "name": "DB_NAME", "value": "data_agent_db" },
+        { "name": "DB_USER", "value": "postgres" },
+        { "name": "DB_PASSWORD", "value": "change_me" },
+        { "name": "DB_SCHEMA", "value": "public" },
+        { "name": "GROQ_API_KEY", "value": "your_groq_api_key_here" },
+        { "name": "FRONTEND_URL", "value": "*" }
+      ]
+    }
+  ]
+}
