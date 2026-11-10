@@ -1,10 +1,11 @@
+from contextlib import asynccontextmanager
 from slowapi import _rate_limit_exceeded_handler
 from dotenv import load_dotenv
 from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
-from data_agent.guardrails.rails import check_guardrails
+from data_agent.guardrails.rails import check_guardrails, get_rails
 from data_agent.agents.graph import ai_data_agent
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -21,7 +22,28 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-app = FastAPI(title="Database Agent")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Eagerly initialize and warm up NeMo Guardrails and DB schema on startup."""
+    logger.info("Initializing and warming up NeMo Guardrails on startup...")
+    try:
+        rails = get_rails()
+        rails.generate(messages=[{"role": "user", "content": "hello"}])
+        logger.info("NeMo Guardrails warmup completed successfully.")
+    except Exception as e:
+        logger.warning(f"NeMo Guardrails warmup skipped or encountered an issue: {e}")
+
+    try:
+        from data_agent.utils.schema_catalog import build_schema_context
+        build_schema_context("warmup")
+        logger.info("Database schema catalog cache pre-warmed successfully.")
+    except Exception as e:
+        logger.warning(f"Database schema catalog warmup skipped or encountered an issue: {e}")
+
+    yield
+
+
+app = FastAPI(title="Database Agent", lifespan=lifespan)
 
 limiter=Limiter(key_func=get_remote_address)
 app.state.limiter=limiter
