@@ -17,15 +17,23 @@ class Settings:
     def __init__(self):
         self.groq_api_key = os.getenv("GROQ_API_KEY")
 
-        self.groq_model_api_base = (
-            "https://api.groq.com/openai/v1"
+        self.groq_model_api_base = os.getenv(
+            "GROQ_API_BASE", "https://api.groq.com/openai/v1"
         )
 
-        self.groq_model1 = "openai/gpt-oss-120b"
-        self.groq_model2 = "openai/gpt-oss-20b"
-        self.groq_guardrail_model="qwen/qwen3.8-27b"
+        self.groq_model1 = os.getenv("GROQ_MODEL_HIGH", "openai/gpt-oss-120b")
+        self.groq_model2 = os.getenv("GROQ_MODEL_LOW", "openai/gpt-oss-20b")
+        self.groq_guardrail_model=os.getenv(
+            "GROQ_GUARDRAIL_MODEL", "qwen/qwen3.8-27b"
+        )
 
-
+        # CORS allowed origins
+        raw_origins = os.getenv(
+            "FRONTEND_URL", "http://127.0.0.1:8001,http://localhost:8501"
+        )
+        self.allowed_origins: list[str] = [
+            url.strip() for url in raw_origins.split(",") if url.strip()
+        ]
 
         # DB config
 
@@ -49,6 +57,10 @@ class Settings:
 
         self.max_sql_retries=int(os.getenv("MAX_SQL_RETRIES","2"))
 
+        self.sql_max_rows = max(1, int(os.getenv("SQL_MAX_ROWS", "100")))
+        self.sql_statement_timeout_ms = max(
+            1000, int(os.getenv("SQL_STATEMENT_TIMEOUT_MS", "10000"))
+        )
 
 
 

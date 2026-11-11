@@ -25,13 +25,7 @@ Rules:
 
 def generate_sql_node(state: AgentSchema) -> AgentSchema:
 
-    # llm=choose_llm("high")
-
-    # response = llm.invoke(state.prompt_query_context)
-
-    # state.generated_sql_query=response.content.strip()
-
-    # return state
+    
 
     llm = choose_llm("high")
 

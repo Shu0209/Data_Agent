@@ -6,7 +6,7 @@ from data_agent.guardrails.rails import (
     get_rails,
     check_guardrails,
     async_check_guardrails,
-    guardrails_node,
+    # guardrails_node,
 )
 
 __all__ = [
@@ -15,5 +15,5 @@ __all__ = [
     "get_rails",
     "check_guardrails",
     "async_check_guardrails",
-    "guardrails_node",
+    # "guardrails_node",
 ]

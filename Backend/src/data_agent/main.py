@@ -1,12 +1,15 @@
+from data_agent.config import settings
 from contextlib import asynccontextmanager
 from slowapi import _rate_limit_exceeded_handler
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional
-from data_agent.guardrails.rails import check_guardrails, get_rails
+from data_agent.guardrails.rails import check_guardrails, get_rails,async_check_guardrails
 from data_agent.agents.graph import ai_data_agent
+from data_agent.utils.database import check_database_health
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -51,14 +54,12 @@ app.state.limiter=limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-raw_origins = os.getenv("FRONTEND_URL", "http://127.0.0.1:8001")
-origins = [url.strip() for url in raw_origins.split(",") if url.strip()]
 
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origins],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -83,6 +84,17 @@ def home():
     return {"message": "DataBase Agent Backend is Live."}
 
 
+@app.get("/health")
+def health_check():
+    """Readiness check verifying PostgreSQL connectivity."""
+    db_ok, db_status = check_database_health()
+    payload = {
+        "status": "healthy" if db_ok else "degraded",
+        "database": db_status,
+    }
+    code = status.HTTP_200_OK if db_ok else status.HTTP_503_SERVICE_UNAVAILABLE
+    return JSONResponse(status_code=code, content=payload)
+
 @app.get("/graph_img")
 def get_graph_image():
     try:
@@ -95,22 +107,22 @@ def get_graph_image():
 
 
 @app.post("/guardrail")
-def guardrail_check(request: QueryRequest):
+async def guardrail_check(query_data: QueryRequest):
     """Directly evaluate user input against NeMo Guardrails."""
-    return check_guardrails(request.user_input)
+    return await async_check_guardrails(query_data.user_input)
 
 
 @app.post("/query")
 @limiter.limit("6/minute")
-def query(request:Request ,query_data: QueryRequest):
+async def query(request:Request ,query_data: QueryRequest):
 
     user_input = query_data.user_input
     thread_id = query_data.thread_id
 
     # 1. Guardrail input validation
     try:
-        guardrail_result = check_guardrails(user_input)
-        if not guardrail_result.get("is_allowed", True):
+        guardrail_result = await async_check_guardrails(user_input)
+        if not guardrail_result.get("is_allowed", False):
             logger.info(
                 f"Guardrail intercepted query: flagged={guardrail_result.get('flagged')}, "
                 f"reason={guardrail_result.get('reason')}"
@@ -143,7 +155,7 @@ def query(request:Request ,query_data: QueryRequest):
     config = {"configurable": {"thread_id": thread_id}}
 
     try:
-        final_output = ai_data_agent.invoke(state, config=config)
+        final_output =await ai_data_agent.ainvoke(state, config=config)
 
         return {
             "curated_ques": final_output.get("curated_ques"),
@@ -171,8 +183,13 @@ def query(request:Request ,query_data: QueryRequest):
         }
 
 
-if __name__ == "__main__":
+
+def main() -> None:
+   
     import uvicorn
 
     uvicorn.run("data_agent.main:app", host="0.0.0.0", port=8000, reload=True)
+
+if __name__ == "__main__":
+    main()
 

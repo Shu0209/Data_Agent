@@ -130,7 +130,11 @@
 
 
 import psycopg2
+import logging
+import contextlib
 from data_agent.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class DatabaseClass:
@@ -212,6 +216,30 @@ class DatabaseClass:
                 cursor.close()
             if connection:
                 connection.close()
+
+
+
+def check_database_health() -> tuple[bool, str]:
+    """Run a lightweight SELECT 1 check for readiness probes."""
+    try:
+        with contextlib.closing(
+            psycopg2.connect(
+                host=settings.DB_host,
+                port=settings.DB_port,
+                user=settings.DB_user,
+                password=settings.DB_password,
+                dbname=settings.DB_name,
+                connect_timeout=3,
+                options="-c statement_timeout=3000 -c default_transaction_read_only=on",
+            )
+        ) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+                cur.fetchone()
+        return True, "ok"
+    except Exception as exc:
+        logger.warning("Database health check failed: %s", exc)
+        return False, "unavailable"
 
 
 # if __name__ == "__main__":
