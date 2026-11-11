@@ -50,7 +50,9 @@ app.state.limiter=limiter
 
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-origins=os.getenv("FRONTEND_URL","http://127.0.0.1:8001")
+
+raw_origins = os.getenv("FRONTEND_URL", "http://127.0.0.1:8001")
+origins = [url.strip() for url in raw_origins.split(",") if url.strip()]
 
 
 
