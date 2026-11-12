@@ -389,5 +389,5 @@ with tab_erd:
             )
     else:
         st.warning(
-            "Could not find `db_erd.png` inside the `Backend/ER_diagram` directory."
+            "Could not find `db_erd.png` inside the `Frontend/ER_diagram` directory."
         )
