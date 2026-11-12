@@ -26,7 +26,7 @@ import logfire
 
 load_dotenv()
 
-logfire.configure(token=os.getenv("LOGFIRE_API_KEY"))
+logfire.configure(service_name="database-agent-backend",token=os.getenv("LOGFIRE_API_KEY"))
 
 
 
@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Database Agent", lifespan=lifespan)
 
-logfire.instrument_fastapi(app)
+logfire.instrument_fastapi(app,excluded_urls=r"^/(?:health)?$")
 
 
 limiter = Limiter(key_func=get_remote_address)
