@@ -95,7 +95,6 @@ class QueryRequest(BaseModel):
 
 @app.get("/")
 def home():
-    logfire.info("Home endpoint accessed")
 
     return {"message": "DataBase Agent Backend is Live."}
 
