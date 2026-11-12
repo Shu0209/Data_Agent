@@ -1,5 +1,9 @@
 from langchain_openai import ChatOpenAI
 from data_agent.config import settings
+import logfire
+
+
+logfire.instrument_openai()
 
 def choose_llm(level:str):
     settings.validate_groq_api()
