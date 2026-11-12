@@ -1,3 +1,4 @@
+import logfire
 from data_agent.models.schemas import AgentSchema
 from data_agent.utils.llm import choose_llm
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -27,21 +28,32 @@ def generate_sql_node(state: AgentSchema) -> AgentSchema:
 
     
 
-    llm = choose_llm("high")
+    with logfire.span("Genrated SQL node activated"):
+      try:
+        logfire.info("SQL generation started")
+        llm = choose_llm("high")
 
-    # Stable rules + schema go in the system message; the question stays separate.
-    messages = [
-        SystemMessage(content=SQL_SYSTEM_PROMPT.format(schema=state.schema_context)),
-        HumanMessage(
-            content=(
-                f"Original user question:\n{state.user_input}\n\n"
-                f"Curated question:\n{state.curated_ques}"
-            )
-        ),
-    ]
+        # Stable rules + schema go in the system message; the question stays separate.
+        messages = [
+            SystemMessage(content=SQL_SYSTEM_PROMPT.format(schema=state.schema_context)),
+            HumanMessage(
+                content=(
+                    f"Original user question:\n{state.user_input}\n\n"
+                    f"Curated question:\n{state.curated_ques}"
+                )
+            ),
+        ]
 
-    response = llm.invoke(messages)
 
-    state.generated_sql_query = response.content.strip()
+        response = llm.invoke(messages)
 
-    return state
+        state.generated_sql_query = response.content.strip()
+
+        logfire.info("✅SQL generation completed successfully")
+
+        return state
+
+      except Exception as e:
+            logfire.error(f"❌SQL generation failed:{e}")
+
+            raise

@@ -1,18 +1,39 @@
+import logfire
+
 from data_agent.models.schemas import AgentSchema
 from data_agent.utils.schema_catalog import build_schema_context
 
 
+
+
+
 def schema_context_node(state: AgentSchema) -> AgentSchema:
-    """Attach the (cached, question-scoped) schema to state.
+    """Attach cached, question-scoped schema context to graph state."""
 
-    The schema is stored on its own. The SQL prompt is assembled in generate_sql,
-    so the prompt text itself is never kept in state or returned by the API.
-    """
-    question = state.curated_ques or state.user_input
+    with logfire.span("Schema Context Node"):
 
-    schema_context, schema_tables = build_schema_context(question)
+        try:
+            question = state.curated_ques or state.user_input
 
-    state.schema_context = schema_context
-    state.schema_tables = schema_tables
+            logfire.info("Schema context retrieval started")
 
-    return state
+            # Retrieve relevant schema
+            with logfire.span("Build Database Schema Context"):
+
+                schema_context, schema_tables = build_schema_context(
+                    question
+                )
+
+            # Attach schema to state
+            state.schema_context = schema_context
+            state.schema_tables = schema_tables
+
+            logfire.info(
+                "✅Schema context retrieval completed")
+
+            return state
+
+        except Exception as e:
+            logfire.error(f"❌Schema context retrieval failed: {e}")
+
+            raise
