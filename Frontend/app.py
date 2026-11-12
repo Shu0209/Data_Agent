@@ -37,9 +37,6 @@ def find_data_directory() -> Path | None:
     """Find the data directory containing CSV files across common project layouts."""
     frontend_dir = Path(__file__).resolve().parent
     candidates = [
-        frontend_dir.parent / "Backend" / "data",
-        frontend_dir.parent / "Backend_Fix" / "data",
-        frontend_dir.parent / "data",
         frontend_dir / "data",
     ]
     for p in candidates:
@@ -375,10 +372,7 @@ with tab_erd:
     st.subheader("🗺️ Entity Relationship (ER) Diagram")
 
     erd_candidates = [
-        Path(__file__).resolve().parent.parent
-        / "Backend"
-        / "ER_diagram"
-        / "db_erd.png",
+        Path(__file__).resolve().parent / "ER_diagram" / "db_erd.png",
     ]
     erd_file = next((p for p in erd_candidates if p.is_file()), None)
 
