@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Database Agent", lifespan=lifespan)
 
-logfire.instrument_fastapi(app,excluded_urls=r"^/(?:health)?$")
+logfire.instrument_fastapi(app, excluded_urls=r".*/(?:health)?$")
 
 
 limiter = Limiter(key_func=get_remote_address)
