@@ -43,6 +43,7 @@ class Settings:
         self.DB_user = os.getenv("DB_USER", "postgres")
         self.DB_password = os.getenv("DB_PASSWORD")
         self.DB_schema = os.getenv("DB_SCHEMA", "public")
+        self.sslmode=os.getenv("SSL_MODE")
 
 
         # Schema context (what gets sent to the SQL-generation prompt)

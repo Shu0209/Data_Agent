@@ -96,7 +96,7 @@ with st.sidebar:
 
     show_execution_result = st.toggle(
         "Show SQL execution result",
-        value=False,
+        value=True,
     )
 
     st.divider()
@@ -116,8 +116,8 @@ with st.sidebar:
 # Main Navigation Tabs
 # --------------------------------------------------
 
-tab_chat, tab_tables, tab_erd = st.tabs(
-    ["💬 Chat Agent", "📁 Database Tables", "🗺️ ER Diagram"]
+tab_chat, tab_guardrails, tab_tables, tab_erd = st.tabs(
+    ["💬 Chat Agent", "🛡️ Guardrail Check", "📁 Database Tables", "🗺️ ER Diagram"]
 )
 
 
@@ -292,7 +292,93 @@ with tab_chat:
 
 
 # ==================================================
-# TAB 2: Database Tables Viewer
+# TAB 2: Guardrails Checker
+# ==================================================
+
+with tab_guardrails:
+    st.subheader("🛡️ NeMo Guardrails Input Checker")
+    st.caption(
+        "Evaluate user inputs directly against guardrails (safety policies, destructive SQL prevention, jailbreak detection) without triggering the SQL generation agent or touching the database."
+    )
+
+    test_input = st.text_area(
+        "User Input to Test",
+        placeholder="Type a query or command to check against guardrails (e.g., 'What are total sales by product?' or 'DROP TABLE users')...",
+        height=120,
+        key="guardrail_eval_text",
+    )
+
+    col1, col2 = st.columns([1, 4])
+    with col1:
+        evaluate_clicked = st.button(
+            "Check Guardrails", type="primary", use_container_width=True
+        )
+
+    if evaluate_clicked:
+        if not test_input.strip():
+            st.warning("Please enter some text before checking guardrails.")
+        else:
+            with st.spinner("Evaluating input with NeMo Guardrails..."):
+                try:
+                    res = requests.post(
+                        f"{backend_url}/guardrail",
+                        json={"user_input": test_input.strip()},
+                        timeout=30,
+                    )
+
+                    if res.ok:
+                        guardrail_res = res.json()
+                        is_allowed = guardrail_res.get("is_allowed", False)
+                        flagged = guardrail_res.get("flagged", False)
+                        reason = guardrail_res.get("reason", "No reason provided.")
+                        bot_response = guardrail_res.get("bot_response", "")
+
+                        st.divider()
+
+                        if is_allowed:
+                            st.success("### ✅ PASSED")
+                            st.markdown(
+                                "**Guardrail Verdict:** Allowed — this input passed all safety and topicality rules."
+                            )
+                        else:
+                            st.error("### ❌ NOT PASSED / BLOCKED")
+                            st.markdown(
+                                "**Guardrail Verdict:** Blocked / Intercepted by guardrails."
+                            )
+
+                        metric_col1, metric_col2, metric_col3 = st.columns(3)
+                        with metric_col1:
+                            st.metric("Pass Status", "Passed" if is_allowed else "Blocked")
+                        with metric_col2:
+                            st.metric("Flagged as Violation", "Yes" if flagged else "No")
+                        with metric_col3:
+                            st.metric("Backend Status", f"{res.status_code} OK")
+
+                        st.markdown(f"**Reason:** {reason}")
+                        if bot_response:
+                            st.markdown(f"**Guardrail Output / Refusal:** {bot_response}")
+
+                        with st.expander("🔍 View Raw JSON Response"):
+                            st.json(guardrail_res)
+
+                    else:
+                        st.error(
+                            f"Backend returned HTTP {res.status_code}: {res.text}"
+                        )
+
+                except requests.exceptions.ConnectionError:
+                    st.error(
+                        f"Could not connect to FastAPI backend at `{backend_url}`. "
+                        "Make sure your backend server is running."
+                    )
+                except requests.exceptions.Timeout:
+                    st.error("The guardrail evaluation request timed out.")
+                except Exception as ex:
+                    st.error(f"Failed to check guardrail: {ex}")
+
+
+# ==================================================
+# TAB 3: Database Tables Viewer
 # ==================================================
 
 with tab_tables:
@@ -365,23 +451,20 @@ with tab_tables:
 
 
 # ==================================================
-# TAB 3: ER Diagram
+# TAB 4: ER Diagram
 # ==================================================
 
 with tab_erd:
     st.subheader("🗺️ Entity Relationship (ER) Diagram")
 
     erd_candidates = [
-        Path(__file__).resolve().parent / "ER_diagram" / "db_erd.png",
+        Path(__file__).resolve().parent / "ER_diagram" / "Database_erd.png",
     ]
     erd_file = next((p for p in erd_candidates if p.is_file()), None)
 
     if erd_file:
         try:
-            st.image(
-                str(erd_file),
-                use_container_width=True,
-            )
+            st.image(str(erd_file), width=700)
         except TypeError:
             st.image(
                 str(erd_file),

@@ -76,7 +76,7 @@ checkpoints/
 
 
 
-feed_db.py
+
 
 
 data2/
@@ -87,3 +87,8 @@ data_agent_graph.png
 
 Backend_Fix
 
+Employe_dataset
+
+data2
+
+data3

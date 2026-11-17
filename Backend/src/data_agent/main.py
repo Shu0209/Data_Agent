@@ -159,7 +159,23 @@ def get_graph_image():
 @app.post("/guardrail")
 async def guardrail_check(query_data: QueryRequest):
     """Directly evaluate user input against NeMo Guardrails."""
-    return await async_check_guardrails(query_data.user_input)
+    with logfire.span("guardrail_check"):
+        try:
+            result = await async_check_guardrails(query_data.user_input)
+
+            logfire.info("Guardrail evaluation completed")
+
+            return result
+
+        except Exception as e:
+            logfire.exception(f"Guardrail evaluation failed: {e}")
+            return {
+        "is_allowed": False,
+        "flagged": True,
+        "reason": f"Guardrail evaluation error: {str(e)}",
+        "bot_response": "An error occurred while evaluating your request safety.",
+    }
+            
 
 
 @app.post("/query")
